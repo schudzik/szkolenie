@@ -12,6 +12,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -39,14 +40,26 @@ public class WordPressTest {
     }
     @Test
     public void canFindBlog() {
+        String komentarz = UUID.randomUUID().toString();
         driver.get("https://automatyzacja.benedykt.net/");
         driver.findElement(By.cssSelector(".entry-title>a")).click();
-        driver.findElement(By.id("comment")).sendKeys("test");
-        driver.findElement(By.id("author")).sendKeys("test");
+        driver.findElement(By.id("comment")).sendKeys(komentarz);
+        driver.findElement(By.id("author")).sendKeys("Sylwia");
         driver.findElement(By.id("email")).sendKeys("test@pl.pl");
         przesunieciescrolla(driver.findElement(By.id("submit")));
-        driver.findElement(By.id("submit")).click();
+        driver.findElement(By.id("submit")).submit();
+
+        List<WebElement> listOfNotes = driver.findElements(By.className("comment-body"));
+        Stream<WebElement> streamOfNotes = listOfNotes.stream();
+        Stream<WebElement> filteredStream = streamOfNotes
+                .filter(n -> n.findElement(By.tagName("p")).getText().equals(komentarz));
+        List<WebElement> filteredNotes = filteredStream.collect(Collectors.toList());
+        Assertions.assertEquals(1, filteredNotes.size() , "Znaleziono ");
+
+        //driver.findElement(By.xpath("//*[@class='comment-body']//a[text()='Sylwia']/../../../../div")).getText().equals("komentarz");
+
     }
+
 
 
     @AfterEach
