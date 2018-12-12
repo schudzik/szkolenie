@@ -22,7 +22,11 @@ public class SeleniumTest {
 
     @BeforeEach
     public void startDriver() {
+        System.setProperty("webdriver.chrome.driver","c:\\drivers\\chrome\\chromedriver.exe");
        driver = new ChromeDriver();
+       driver.manage().window().maximize();
+       driver.manage().timeouts().implicitlyWait(5,TimeUnit.SECONDS);
+
     }
 
 
@@ -41,6 +45,47 @@ public class SeleniumTest {
         Assertions.assertEquals("agileszkolenia.pl/" , driver.findElement(By.tagName("cite")).getText());
 
     }
+    @Test
+    public void veriryAuthorOfBlogNoteAboutTrannsformation(){
+
+        driver.get("http://markowicz.pro/");
+        Stream<WebElement> listOfNotes = driver.findElements(By.className("entry-title"))
+        .stream()
+        .filter(n ->n.findElement(By.tagName("a")).getText().equals("O transformacjach"));
+
+        List<WebElement> filteredNotes = listOfNotes.collect(Collectors.toList());
+        Assertions.assertEquals(1, filteredNotes.size(),"Only one note is found on main page");
+
+
+        }
+    @Test
+    public void verifyAuthorOfBlogNoteAboutTransformationsStepByStep() {
+        driver.get("http://markowicz.pro/");
+
+        List<WebElement> listOfNotes = driver.findElements(By.className("entry-title"));
+
+        Stream<WebElement> streamOfNotes = listOfNotes.stream();
+
+        Stream<WebElement> filteredStream = streamOfNotes
+                .filter(n -> n.findElement(By.tagName("a")).getText().equals("O transformacjach"));
+
+        List<WebElement> filteredNotes = filteredStream.collect(Collectors.toList());
+
+        Assertions.assertEquals(1, filteredNotes.size(), "Only one matching note is found on main page");
+
+        driver.findElement(By.cssSelector("#eu-cookie-law input")).submit();
+
+
+        filteredNotes.get(0).click();
+        WebElement author = driver.findElement(By.cssSelector(".author > a"));
+        Assertions.assertEquals("Rafał", author.getText(), "Proper author name is displayed");
+        Assertions.assertEquals("http://markowicz.pro/author/rafal-markowicz/",
+                author.getAttribute("href"),
+                "Valid author URL is displayed");
+
+    }
+
+
 
     @AfterEach
     public void closeDriver() {
